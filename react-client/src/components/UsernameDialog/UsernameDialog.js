@@ -8,7 +8,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContentText from '@material-ui/core/DialogContentText';
 
 
-import store from '../store';
+import store from '../../store';
 
 export default class UsernameDialog extends React.Component {
   state = {

@@ -10,7 +10,7 @@ import AddIcon from '@material-ui/icons/Add';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 
-import store from '../store';
+import store from '../../store';
 
 export default class AddRoomDialog extends React.Component {
   state = {

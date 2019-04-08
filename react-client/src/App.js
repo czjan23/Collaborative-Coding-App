@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import NavBar from './components/Navbar';
-import RoomPanel from './components/RoomPanel';
-import Room from './components/Room';
-import UsernameDialog from './components/UsernameDialog';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import NavBar from './components/Navbar/Navbar';
+import RoomPanel from './components/RoomPanel/RoomPanel';
+import Room from './components/Room/Room';
+import UsernameDialog from './components/UsernameDialog/UsernameDialog';
 
 import store from './store';
 

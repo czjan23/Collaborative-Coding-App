@@ -7,7 +7,7 @@ import 'brace/mode/python';
 import 'brace/theme/tomorrow';
 import io from 'socket.io-client';
 
-import store from '../store';
+import store from '../../store';
 
 const socket = io.connect('http://localhost:3001/');
 

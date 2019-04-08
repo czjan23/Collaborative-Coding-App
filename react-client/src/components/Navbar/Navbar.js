@@ -10,7 +10,7 @@ import { withStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import { Link } from 'react-router-dom';
 
-import { store } from '../App';
+import store from '../../store';
 
 const styles = theme => ({
   root: {
