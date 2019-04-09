@@ -10,7 +10,7 @@ import store from './store';
 class App extends Component {
   render() {
     return (
-        <div style={{height: '100vh'}}>
+        <div style={{height: '90vh'}}>
           <UsernameDialog />
           <Router>
             <NavBar />

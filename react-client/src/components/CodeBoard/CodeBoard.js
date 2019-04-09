@@ -5,18 +5,16 @@ import 'brace/mode/java';
 import 'brace/mode/javascript';
 import 'brace/mode/python';
 import 'brace/theme/tomorrow';
-import io from 'socket.io-client';
 
 import store from '../../store';
-
-const socket = io.connect('http://localhost:3001/');
+import socket from '../../socket';
 
 const defaultVals = {
   'java': 
 `public class HelloWorld {
-public static void main(String[] args) {
-    System.out.println("Hello World!");
-}
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+    }
 }`,
   'python': `print('hello world')`,
   'javascript': `console.log('hello world');`
@@ -32,27 +30,35 @@ class CodeBoard extends Component {
     }
   }
 
+  tabCloseHandler(event) {
+    event.preventDefault();
+    socket.emit('leaveRoom', {room: this.props.id});
+  }
+
   componentWillMount() {
-    socket.emit('enterRoom', {val: this.props.id});
-    socket.on('newCode', (code) => {
-      this.setState({code: code.val.val});
-      // console.log(code.val.val);
-    })
+    console.log('hell yeah');
+    socket.emit('enterRoom', {room: this.props.id, member: store.getState().userName});
+    socket.on('newCode', data => this.setState({code: data.code}));
+  }
+
+  componentDidMount() {
+    window.addEventListener('beforeunload', this.tabCloseHandler.bind(this));
   }
 
   componentWillUnmount() {
-    socket.emit('leaveRoom', {val: this.props.id});
+    window.removeEventListener('beforeunload', this.tabCloseHandler.bind(this));
+    socket.emit('leaveRoom', {room: this.props.id});
   }
 
   onChange(newCode) {
-    socket.emit('newCode', {val: newCode});
+    socket.emit('newCode', {code: newCode});
   }
 
   render() {
     return (
       <div style={{width: '100%', height: '100%'}}>
         <AceEditor
-          style={{width: '100%', height: '80%'}}
+          style={{width: '100%', height: '95%'}}
           placeholder="Placeholder Text"
           mode={this.state.language}
           theme="tomorrow"
@@ -65,9 +71,6 @@ class CodeBoard extends Component {
           highlightActiveLine={true}
           value={this.state.code}
           setOptions={{
-          enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: true,
           showLineNumbers: true,
           tabSize: 4,
         }}/>

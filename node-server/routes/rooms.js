@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            console.log(rooms);
+            // console.log(rooms);
             res.send(rooms);
         }
     });
@@ -24,7 +24,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     let name = req.body.name;
     let language = req.body.language;
     RoomModel.create({

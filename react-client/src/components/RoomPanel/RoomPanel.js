@@ -6,6 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
 
 import AddRoomDialog from '../AddRoomDialog/AddRoomDialog';
@@ -18,8 +19,7 @@ const styles = theme => ({
     marginTop: '100px',
     width: '100%',
     textAlign: 'center',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    maxWidth: 420,
   },
   room: {
     textAlign: 'center',
@@ -54,21 +54,26 @@ class RoomPanel extends React.Component {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-        <List component="nav">
-          {this.getFilteredList().map((room, index) => {
-            return (
-                <ListItem key={index} button component={Link} to={`/room/${index}`}>
-                  {room.language === 'java' ? <i className="fab fa-java"></i> : ''}
-                  {room.language === 'javascript' ? <i className="fab fa-js-square"></i> : ''}
-                  {room.language === 'python' ? <i className="fab fa-python"></i> : ''}
-                  <ListItemText className={classes.room} primary={room.name} />
-                  <IconButton aria-label="Delete" onClick={(e) => this.deleteRoom(e, index)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItem>
-            )
-          })}
-        </List>
+        <Typography variant="h4">
+            Room List
+        </Typography>
+        <div className={classes.list}>
+          <List component="nav">
+            {this.getFilteredList().map((room, index) => {
+              return (
+                  <ListItem key={index} button component={Link} to={`/room/${index}`}>
+                    {room.language === 'java' ? <i className="fab fa-java"></i> : ''}
+                    {room.language === 'javascript' ? <i className="fab fa-js-square"></i> : ''}
+                    {room.language === 'python' ? <i className="fab fa-python"></i> : ''}
+                    <ListItemText className={classes.room} primary={room.name} />
+                    <IconButton aria-label="Delete" onClick={(e) => this.deleteRoom(e, index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItem>
+              )
+            })}
+          </List>
+        </div>
         <AddRoomDialog />
       </div>
     );

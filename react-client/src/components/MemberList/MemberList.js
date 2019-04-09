@@ -1,12 +1,22 @@
 import React, { Component } from 'react';
+import Typography from '@material-ui/core/Typography';
 
 import store from '../../store';
 
 class MemberList extends Component {
   render() {
     return (
-        <div style={{width: '100%', height: '50%'}}>
-            <h1>Member List will be here</h1>
+        <div>
+          <Typography variant="h6" color="inherit">
+            Members
+          </Typography>
+          {store.getState().memberList.map((member, index) => {
+            return (
+              <Typography key={index}  variant="body1" color="inherit">
+                {member}
+              </Typography>
+            )
+          })}
         </div>
     );
   }

@@ -7,6 +7,7 @@ import {Redirect} from "react-router-dom";
 import CodeBoard from '../CodeBoard/CodeBoard';
 import MemberList from '../MemberList/MemberList';
 import Output from '../Output/Output';
+import Note from '../Note/Note';
 
 import store from '../../store';
 
@@ -18,20 +19,19 @@ const styles = theme => ({
   },
   paperBoard: {
     padding: theme.spacing.unit * 1,
-    height: '100%',
+    height: '95%',
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
   paperMember: {
     marginBottom: '2%',
     padding: theme.spacing.unit * 1,
-    height: '30%',
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
   paperResult: {
     padding: theme.spacing.unit * 1,
-    height: '64.5%',
+    height: '46.5%',
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
@@ -45,21 +45,28 @@ class Room extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-        <Grid container spacing={8} style={{height: '100%'}}>
-          <Grid item xs={6}>
-            <Paper className={classes.paperBoard}>
-              <CodeBoard id={+this.props.match.params.id}/>
-            </Paper>
-          </Grid>
-          <Grid item xs={6}>
-            <Paper className={classes.paperMember}>
-              <MemberList />
+        <Grid container spacing={0} style={{height: '100%'}}>
+        <Grid item xs={1}></Grid>
+        <Grid item xs={1}>
+          <Paper className={classes.paperMember}>
+            <MemberList />
+          </Paper>
+        </Grid>
+          <Grid item xs={4}>
+            <Paper className={classes.paperResult}>
+              <Note />
             </Paper>
             <Paper className={classes.paperResult}>
               <Output />
             </Paper>
           </Grid>
+          <Grid item xs={5}>
+            <Paper className={classes.paperBoard}>
+              <CodeBoard id={+this.props.match.params.id}/>
+            </Paper>
+          </Grid>
         </Grid>
+        <Grid item xs={1}></Grid>
       </div>
     )
   }
