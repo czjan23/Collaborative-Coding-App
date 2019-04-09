@@ -11,7 +11,7 @@ import socket from '../../socket';
 
 const defaultVals = {
   'java': 
-`public class HelloWorld {
+`public class Solution {
     public static void main(String[] args) {
         System.out.println("Hello World!");
     }
@@ -54,6 +54,26 @@ class CodeBoard extends Component {
     socket.emit('newCode', {code: newCode});
   }
 
+  submitHanlder() {
+    let data = {
+      language: this.state.language,
+      code: this.state.code
+    };
+    fetch(
+        'http://localhost:3001/executions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+      )
+      .then(res => res.json())
+      .then(json => console.log(json))
+      .catch(err => console.log(err))
+  }
+
   render() {
     return (
       <div style={{width: '100%', height: '100%'}}>
@@ -74,7 +94,7 @@ class CodeBoard extends Component {
           showLineNumbers: true,
           tabSize: 4,
         }}/>
-      <Button variant="contained" color="primary">
+      <Button variant="contained" color="primary" onClick={this.submitHanlder.bind(this)}>
         Run Your Code
       </Button>
       </div>
