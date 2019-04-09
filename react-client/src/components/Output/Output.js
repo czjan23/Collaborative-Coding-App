@@ -7,9 +7,13 @@ class Output extends Component {
   render() {
     return (
       <div style={{width: '100%', height: '50%'}}>
+        {store.getState().executionResult === '' ?
           <Typography variant="h5" color="inherit">
             Running Results Will be here
           </Typography>
+          :
+          store.getState().executionResult
+        }
       </div>
     );
   }

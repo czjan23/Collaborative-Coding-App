@@ -46,6 +46,7 @@ class CodeBoard extends Component {
   }
 
   componentWillUnmount() {
+    store.dispatch({type: 'setResult', result: ''});
     window.removeEventListener('beforeunload', this.tabCloseHandler.bind(this));
     socket.emit('leaveRoom', {room: this.props.id});
   }
@@ -55,6 +56,7 @@ class CodeBoard extends Component {
   }
 
   submitHanlder() {
+    console.log(this.state.code);
     let data = {
       language: this.state.language,
       code: this.state.code
@@ -70,7 +72,10 @@ class CodeBoard extends Component {
         }
       )
       .then(res => res.json())
-      .then(json => console.log(json))
+      .then(json => {
+        let result = json[1];
+        store.dispatch({type: 'setResult', result: result});
+      })
       .catch(err => console.log(err))
   }
 
