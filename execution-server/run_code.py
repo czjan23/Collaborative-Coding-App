@@ -1,75 +1,107 @@
-import subprocess
+import docker
 import os
+import shutil
+import uuid
 
-def run_code(language, code):
-    if language == 'java':
-        status, result = run_java(code)
-        return status, result
-    elif language == 'javascript':
-        status, result = run_javascript(code)
-        return status, result
-    else:
-        status, result = run_python(code)
-        return status, result
+from docker.errors import APIError
+from docker.errors import ContainerError
+from docker.errors import ImageNotFound
 
-def run_python(code):
-    with open('temp.py', 'w') as f:
-        f.write(code)
-    status = 0
-    result = ''
-    with open('output.txt', 'w') as out, open('error.txt', 'w') as err:
-        status = subprocess.run(["python", "temp.py"], stdout=out, stderr=err).returncode
-    with open('output.txt', 'r') as out, open('error.txt', 'r') as err:
-        if (status == 0):
-            result = out.read()
-        else:
-            result = err.read()
-    os.remove("temp.py")
-    os.remove("output.txt")
-    os.remove("error.txt")
-    return status, result
+CURRENT_DIR = os.path.dirname(os.path.relpath(__file__))
+IMAGE_NAME = 'zhechen/coj'
 
-def run_javascript(code):
-    with open('temp.js', 'w') as f:
-        f.write(code)
-    status = 0
-    result = ''
-    with open('output.txt', 'w') as out, open('error.txt', 'w') as err:
-        status = subprocess.run(["node", "temp.js"], stdout=out, stderr=err).returncode
-    with open('output.txt', 'r') as out, open('error.txt', 'r') as err:
-        if (status == 0):
-            result = out.read()
-        else:
-            result = err.read()
-    os.remove("temp.js")
-    os.remove("output.txt")
-    os.remove("error.txt")
-    return status, result
+client = docker.from_env()
 
-def run_java(code):
-    with open('Solution.java', 'w') as f:
-        f.write(code)
-    status = 0
-    result = ''
-    with open('compile_out.txt', 'w') as out, open('compile_err.txt', 'w') as err:
-        status = subprocess.run(["javac", "Solution.java"], stdout=out, stderr=err).returncode
-    if status == 1:
-        with open('compile_err.txt', 'r') as err:
-            result = err.read()
-        os.remove("compile_out.txt")
-        os.remove("compile_err.txt")
-        return status, result
-    with open('output.txt', 'w') as out, open('error.txt', 'w') as err:
-        status = subprocess.run(["java", "Solution"], stdout=out, stderr=err).returncode
-    with open('output.txt', 'r') as out, open('error.txt', 'r') as err:
-        if (status == 0):
-            result = out.read()
-        else:
-            result = err.read()
-    os.remove("Solution.java")
-    os.remove("Solution.class")
-    os.remove("output.txt")
-    os.remove("error.txt")
-    os.remove("compile_out.txt")
-    os.remove("compile_err.txt")
-    return status, result
+TEMP_BUILD_DIR = "%s/tmp/" % CURRENT_DIR
+CONTAINER_NAME = "%s:latest" % IMAGE_NAME
+
+SOURCE_FILE_NAMES = {
+    "java": "Solution.java",
+    "python": "solution.py",
+    "javascript": 'soclution.js'
+}
+
+BINARY_NAMES = {
+    "java": "Solution",
+    "python": "solution.py",
+    "javascript": 'soclution.js'
+}
+
+BUILD_COMMANDS = {
+    "java": "javac",
+    "python": "python3",
+    "javascript": 'node'
+}
+
+EXECUTE_COMMANDS = {
+    "java": "java",
+    "python": "python3",
+    "javascript": 'node'
+}
+
+
+def load_image():
+    try:
+        client.images.get(IMAGE_NAME)
+        print("Image exists locally")
+    except ImageNotFound:
+        print("image not found locally, loading from docker hub")
+        client.image.pull(IMAGE_NAME)
+    except APIError:
+        print("Can't connect to docker")
+        return
+
+
+def make_dir(dir):
+    try:
+        os.mkdir(dir)
+    except OSError:
+        print("Can't create directory")
+
+
+def build_and_run(code, lang):
+    result = {'build': None, 'run': None, 'error': None}
+
+    source_file_parent_dir_name = uuid.uuid4()
+
+    source_file_host_dir = "%s/%s" % (TEMP_BUILD_DIR, source_file_parent_dir_name)
+
+    source_file_guest_dir = "/test/%s" % (source_file_parent_dir_name)
+
+    make_dir(source_file_host_dir)
+
+    with open("%s/%s" % (source_file_host_dir, SOURCE_FILE_NAMES[lang]), 'w') as source_file:
+        source_file.write(code)
+
+    try:
+        client.containers.run(
+            image=IMAGE_NAME,
+            command="%s %s" % (BUILD_COMMANDS[lang], SOURCE_FILE_NAMES[lang]),
+            volumes={source_file_host_dir: {'bind': source_file_guest_dir, 'mode': 'rw'}},
+            working_dir=source_file_guest_dir
+        )
+
+        result['build'] = 'OK'
+    except ContainerError as e:
+        result['build'] = str(e.stderr, 'utf-8')
+        shutil.rmtree(source_file_host_dir)
+        return result
+
+    try:
+        log = client.containers.run(
+            image=IMAGE_NAME,
+            command="%s %s" % (EXECUTE_COMMANDS[lang], BINARY_NAMES[lang]),
+            volumes={source_file_host_dir: {'bind': source_file_guest_dir, 'mode': 'rw'}},
+            working_dir=source_file_guest_dir
+        )
+
+        log = str(log, 'utf-8')
+        # print(log)
+        result['run'] = log
+    except ContainerError as e:
+        result['run'] = str(e.stderr, 'utf-8')
+        shutil.rmtree(source_file_host_dir)
+        return result
+
+    shutil.rmtree(source_file_host_dir)
+    return result

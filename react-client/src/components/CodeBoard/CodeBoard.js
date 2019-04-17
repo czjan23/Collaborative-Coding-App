@@ -38,7 +38,7 @@ class CodeBoard extends Component {
   componentWillMount() {
     console.log('hell yeah');
     socket.emit('enterRoom', {room: this.props.id, member: store.getState().userName});
-    socket.on('newCode', data => this.setState({code: data.code}));
+    socket.on('newCode', data => {console.log('new code!!!');this.setState({code: data.code})});
   }
 
   componentDidMount() {

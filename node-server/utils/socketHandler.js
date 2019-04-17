@@ -31,10 +31,18 @@ module.exports = (socket) => {
       let idx = room_socketIds[room].indexOf(socket.id);
       if (idx === -1) return;
       room_socketIds[room].splice(idx, 1);
-      let memberList = room_socketIds[room].map((memberSocketId) => socketId_name[memberSocketId]);
-      room_socketIds[room].forEach((memberSocketId) => {
-        socketId_socket[memberSocketId].emit('setMemberList', {memberList: memberList})
-      });
+      if (room_socketIds[room].length === 0) {
+        delete room_socketIds[room];
+        delete room_code[room];
+      } else {
+        let memberList = room_socketIds[room].map((memberSocketId) => socketId_name[memberSocketId]);
+        room_socketIds[room].forEach((memberSocketId) => {
+          socketId_socket[memberSocketId].emit('setMemberList', {memberList: memberList})
+        });
+      }
+      delete socketId_room[socket.id];
+      delete socketId_name[socket.id];
+      delete socketId_socket[socket.id];
     })
     
     socket.on('newCode', (data) => {
